@@ -1,6 +1,6 @@
 #断面検出
 #python 環境一覧（2021/07)
-# python : version = 3.6.5  Anaconda : version = 4.10.3
+# python : version = 3.6.5  Anaconda : version = 4.10.3  (py36excel)
 # Library : numpy=1.19.2, tkinker=8.6.10, matplotlib=3.3.4, 
 # local module : LUD (LU分解、最小二乗平面）, pathio (tk)
 
@@ -402,8 +402,8 @@ def main():
     
     global DETAIL 
 
-    #DETAIL = False
-    DETAIL = True
+    DETAIL = False
+    #DETAIL = True
 
     #座標データと検出したい断面を返す関数
     rpm, rsm, xyzm, xyz_tm = io_begin_plot()
@@ -412,11 +412,21 @@ def main():
     cs0, cs1 = crosecdetct(rpm, xyzm, xyz_tm)
 
     # 点群が構成している平面を推定する
-
-    sfpcd0, ditnce0 = subesurface(cs0, rsm)
+    sfpcd0, ditnce0 = subesurface(cs0, rsm) #sfpcdは断面を構成していた点群データを同一平面に正規化したもの
     matplot(sfpcd0)
     sfpcd1, ditnce1 = subesurface(cs1, rsm)
     matplot(sfpcd1)
+
+    print("\nditnce0 = %f" %(ditnce0))
+    print("ditnce1 = %f" %(ditnce1))
+
+    print(sfpcd0)
+    
+
+
+
+
+
 
 if __name__ == "__main__":
     main()
