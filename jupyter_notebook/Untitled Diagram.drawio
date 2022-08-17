@@ -1,1 +1,225 @@
-<mxfile host="app.diagrams.net" modified="2022-08-17T06:30:13.087Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36" version="16.6.4" etag="WhQkQKbEjK4OnZCqX2sT" type="github"><diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">7VhZc9MwEP41Hp5gfBQnecRp0wKhU2ihw6NiK7aI7DWynINfzyqWYzsOOYD0yDQv0a43K2m/b4/YcPrx/FKQNPoEAeWGbQZzwzk3bNuybQe/lGZRaLq9bqEIBQu0UaW4Zb+oVppam7OAZg1DCcAlS5tKH5KE+rKhI0LArGk2Bt7cNSUhbSlufcLb2nsWyEjfwu5U+ivKwqjc2XJ7xZOYlMb6JllEApjVVM6F4fQFgCxW8bxPuQpeGZf794t7Ppy4lx8+Zz/JV+/j3fW314WzwSE/WV1B0ET+X9d24XpKeK7jpe8qF2UABeRJQJUT03C8SMYclxYuf1ApFxpwkktAFQgZQQgJ4UOAVNuNIZHazFIyTYJ3CliURxz8SaEaMM71Hihp+y5KmRQwWWGnHKyAUMacjCj3iD8JlwftAweBjxJIqHIVIBn0XarDXVRab8/YagwyyIVPt9jpbJFEhHSbP7ewU+er8VQjd0khplIs0EBQTiSbNslMdE6EK7sKd1xo6A+ggdOiwZDEqcp6oFnySuJqBmKyhRsKl1nEJL1NyTJAMywnTb7UeYBX9UJOskyjuAPkw0CaUiHpfGtYy6euzu2yuGlxVlUKq0z/qFYlzswjAXHWAuI7Fs+XlPyXlHT3TMmyY+3MSU2Wkhh7p6j2dAMskTUTGI8zPNg6dVYb/j2b3rbYdA0tMu3G41nT7ZHI1DmMS9aT55L7hxbhcgyDNxK4CtUq5XkYIlnQXWI4g3btiiAe5dnudtHAWDFoQGLGVbyuKJ9SyXyyoakQzkLc99xHuKnYTB7ckiUhSm4l3S3JivX3iM2m02w2K7nebcwN3aZ7rG7TaWF6g+gV0NkmX+J7Yh3fsddA6D12y+/uU6SfdQl+8I5fVtPdLd/as0xr9phvHPw0CPT0p4DeXjPlyxhwHIbZpzYIlCes8cnL+ag9CYxykSwHAcjlyySwbRKwNzWhB50EykJYA/ULTQlDMM3hKc4B6//8z5zHngPKStGEgKuY2maRYSeGwfos5ljHwwDF6k1tUQqr993OxW8=</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2022-08-17T07:30:11.033Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36" etag="lGJL3BAGY4SpW_Kh2BUF" version="16.6.4" type="github">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="1235" dy="1036" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-3" value="開始" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;glass=0;strokeWidth=1;shadow=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="110" y="81" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-0" value="点群ファイル&lt;br&gt;読み込み" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="161" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-1" value="" style="rounded=0;html=1;jettySize=auto;orthogonalLoop=1;fontSize=11;endArrow=none;endFill=0;endSize=8;strokeWidth=1;shadow=0;labelBackgroundColor=none;edgeStyle=orthogonalEdgeStyle;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="WIyWlLk6GJQsqaUBKTNV-3" target="--fctXItfLN7RRnFuYwR-0">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="121" as="sourcePoint" />
+            <mxPoint x="170" y="321" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-9" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;endFill=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-2" target="--fctXItfLN7RRnFuYwR-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-2" value="分割数Nの入力" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="251" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-3" value="" style="rounded=0;html=1;jettySize=auto;orthogonalLoop=1;fontSize=11;endArrow=none;endFill=0;endSize=8;strokeWidth=1;shadow=0;labelBackgroundColor=none;edgeStyle=orthogonalEdgeStyle;startArrow=none;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-0" target="--fctXItfLN7RRnFuYwR-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="221" as="sourcePoint" />
+            <mxPoint x="170" y="321" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-10" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;endFill=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-4" target="--fctXItfLN7RRnFuYwR-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-4" value="断面処理１&lt;br&gt;i &amp;lt; N" style="shape=loopLimit;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="501" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-19" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="941" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-7" value="i ++&lt;br&gt;断面処理1" style="shape=loopLimit;whiteSpace=wrap;html=1;hachureGap=4;direction=west;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="120" y="821" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-13" value="慣性モーメントより&lt;br&gt;主軸を決定する" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="341" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-14" value="点群の座標を&lt;br&gt;主軸と垂直な&lt;br&gt;二次元座標系に変換" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="586" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-15" value="点群を主軸と&lt;br&gt;垂直な断面に&lt;br&gt;フィッティング" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="421" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-16" value="最小二乗法を用いて&lt;br&gt;H型鋼に&lt;br&gt;フィッティング" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="661" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-17" value="推定した重心点座標を取り出し、元の座標系に戻す" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="110" y="731" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-23" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="941" as="sourcePoint" />
+            <mxPoint x="260" y="941" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-24" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="941" as="sourcePoint" />
+            <mxPoint x="260" y="81" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-25" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="260" y="80" as="sourcePoint" />
+            <mxPoint x="374" y="80" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-29" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-27">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="203" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-31" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;targetPerimeterSpacing=8;startArrow=none;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-44" target="--fctXItfLN7RRnFuYwR-30">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="321" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-27" value="断面処理２&lt;br&gt;i &amp;lt; N" style="shape=loopLimit;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="320" y="151" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-68" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-30" target="--fctXItfLN7RRnFuYwR-67">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-30" value="i ++&lt;br&gt;断面処理２" style="shape=loopLimit;whiteSpace=wrap;html=1;hachureGap=4;direction=west;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="320" y="781" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-33" value="" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-27">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="211" as="sourcePoint" />
+            <mxPoint x="370" y="321" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-39" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-34">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="271" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-47" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-34" target="--fctXItfLN7RRnFuYwR-41">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-34" value="両端の&lt;br&gt;断面では&lt;br&gt;ない" style="rhombus;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="231" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-36" value="YES" style="text;strokeColor=none;fillColor=none;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="374" y="301" width="46" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-37" value="NO" style="text;strokeColor=none;fillColor=none;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="400" y="241" width="46" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-49" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-41">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="393" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-50" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-41" target="--fctXItfLN7RRnFuYwR-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-41" value="隣り合う断面&lt;br&gt;の推定重心を&lt;br&gt;結んだベクトルを&lt;br&gt;主軸とする" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="321" width="120" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-51" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-42" target="--fctXItfLN7RRnFuYwR-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-42" value="点群の座標を&lt;br&gt;主軸と垂直な&lt;br&gt;二次元座標系に変換" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="421" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-52" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-43" target="--fctXItfLN7RRnFuYwR-44">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-43" value="最小二乗法を用いて&lt;br&gt;H型鋼に&lt;br&gt;フィッティング" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="491" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-44" value="Ｈ形鋼の各線分要素に点群を分け、最小二乗法より各線分を求める" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="561" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-46" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="505.5" y="331" as="sourcePoint" />
+            <mxPoint x="505.5" y="271" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-53" value="隣りの断面の推定重心と自身の断面推定重心を結んだベクトルを主軸とする" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="446" y="301" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-55" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="506" y="411" as="sourcePoint" />
+            <mxPoint x="506" y="381" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-56" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="370" y="411" as="sourcePoint" />
+            <mxPoint x="510" y="411" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-57" value="フランジの厚さを統一するために、線分を調整する" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="631" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-73" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-58" target="--fctXItfLN7RRnFuYwR-71">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-58" value="線分の交点から&lt;br&gt;特徴点をとり、元の座標系に戻す" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="701" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-64" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" target="--fctXItfLN7RRnFuYwR-27">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="370" y="81" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-70" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-67" target="--fctXItfLN7RRnFuYwR-69">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-67" value="特徴点を出力" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="861" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-69" value="終了" style="rounded=1;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="310" y="941" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-75" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-71" target="--fctXItfLN7RRnFuYwR-74">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-77" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-71" target="--fctXItfLN7RRnFuYwR-74">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="527.625" y="883" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-71" value="特徴点から、輪郭を構成する点群を作成し、元の座標系に戻す" style="rounded=0;whiteSpace=wrap;html=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="460" y="701" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-79" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=none;endFill=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-74" target="--fctXItfLN7RRnFuYwR-78">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-74" value="i ++&lt;br&gt;断面処理２" style="shape=loopLimit;whiteSpace=wrap;html=1;hachureGap=4;direction=west;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="470" y="781" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-78" value="輪郭点群を出力&lt;br&gt;（可視化）" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;hachureGap=4;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="460" y="861" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-81" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="961" as="sourcePoint" />
+            <mxPoint x="520" y="921" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="--fctXItfLN7RRnFuYwR-82" value="" style="endArrow=none;html=1;rounded=0;startSize=14;endSize=14;sourcePerimeterSpacing=8;targetPerimeterSpacing=8;curved=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="--fctXItfLN7RRnFuYwR-69">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="480" y="1021" as="sourcePoint" />
+            <mxPoint x="520" y="961" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
