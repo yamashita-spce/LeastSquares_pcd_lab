@@ -631,7 +631,7 @@ def infle():
 
 #アウトプットファイルを選択・作成
 def outfle():
-    global ouf_vtx, ouf_cont
+    global ouf_vtx, ouf_cont, ouf_td
 
     print("Create output file ...")
     root = tk.Tk()
@@ -645,13 +645,18 @@ def outfle():
 
     ouf_vtx = os.path.splitext(ouf)[0] + "_vtx.xyz"
     ouf_cont = os.path.splitext(ouf)[0] + "_cont.xyz"
+    ouf_td = os.path.splitext(ouf)[0] + "_twodimension.xyz" #二次元系の頂点座標を出力するファイル
+
     vf = open(ouf_vtx, "w")
     cf = open(ouf_cont, "w")
+    tf = open(ouf_td, "w")
     vf.close()
     cf.close()
+    tf.close()
 
-    output_log("Output file : %s" %(ouf_vtx), True)
-    output_log("Output file : %s\n" %(ouf_cont), True)
+    output_log("\nOutput file : %s" %(ouf_vtx), True)
+    output_log("Output file : %s" %(ouf_cont), True)
+    output_log("Output file : %s\n" %(ouf_td), True)
 
 # 二次元plot
 def sur_plot(p, sp):
@@ -707,11 +712,11 @@ def line_segment_output(pI, pII, pIII, pts, pbs, number):
 
 def main(): 
 
-    global  DETAIL, DESCRIPTION, N, Nu, pN, D, input_file, ouf_vtx, ouf_cont, epath, dpath, ixyz, lexyz
+    global  DETAIL, DESCRIPTION, N, Nu, pN, D, input_file, ouf_vtx, ouf_cont, ouf_td, epath, dpath, ixyz, lexyz
 
     DETAIL = False #詳細を出力する
-    DESCRIPTION = True #点群を描写する
-    D = 300 #分割したときに拾う点群の数（おおよそ）
+    DESCRIPTION = False #点群を描写する
+    D = 400 #分割したときに拾う点群の数（おおよそ）
     pN = 1000 #輪郭を構成する点の各線分における点群の数（輪郭点不要の場合は少なくしたほうが良い）
 
     try:
@@ -872,12 +877,18 @@ def main():
         cont = np.append(cont, retransform_coordinate_system(s_seg, rV[i], rZZ[i]), axis=0)
         if DESCRIPTION == True: V_plot(cont)
 
+        with open(ouf_td, 'a') as f_handle:
+            np.savetxt(f_handle, s_vtx) #データの保存
+
         pber2.update(1)
 
     pber2.close()
     
+    # データの保存
     np.savetxt(ouf_vtx, vtx)
     np.savetxt(ouf_cont, cont)
+    
+
 
 if __name__ == "__main__":
     print(__name__)
