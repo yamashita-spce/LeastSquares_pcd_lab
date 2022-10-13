@@ -528,14 +528,22 @@ def uniform_side_flange(Pt, Pb, PII, PIII):
 
     return Pt, Pb, U
 
+# webを構成する頂点から重心点を推定
+def cogravity_est(PI, PII, PIII):
+
+    vtx_web = np.zeros((4, 2))
+    vtx_web[0] = slv_equt(PIII[0], PIII[1], PI[0], PI[1]) #E_left
+    vtx_web[1] = slv_equt(PIII[0], PIII[1], PI[0], PI[2]) #E_right
+    vtx_web[2] = slv_equt(PII[0], PII[2], PI[0], PI[1]) #F_left
+    vtx_web[3] = slv_equt(PII[0], PII[2], PI[0], PI[2]) #F_right
+
+    mean = np.array([np.mean(vtx_web.T[0]), np.mean(vtx_web.T[1])]) #web座標平均
+
+    return mean
+
+
 # 頂点を決定する
 def vertex_coordinate_detection(PI, PII, PIII, Pts, Pbs):
-
-    #y = [yd]*x + [yc], x = [xd]*y + [xc]の解を求める関数
-    def slv_equt(yd, yc, xd, xc): 
-        y = (yc + yd*xc) / (1 - yd*xd)
-        x = xd*y + xc  
-        return x, y
     
     vtx_p = np.zeros((12, 2))
     vtx_p[0] = slv_equt(PII[0], PII[1], -PII[0], Pts[0]) #A_up
@@ -552,6 +560,12 @@ def vertex_coordinate_detection(PI, PII, PIII, Pts, Pbs):
     vtx_p[11] = slv_equt(PII[0], PII[2], PI[0], PI[2]) #F_right
 
     return vtx_p
+
+#y = [yd]*x + [yc], x = [xd]*y + [xc]の解を求める関数
+def slv_equt(yd, yc, xd, xc): 
+    y = (yc + yd*xc) / (1 - yd*xd)
+    x = xd*y + xc  
+    return x, y
 
 # 輪郭を構成する点を作成
 def create_contour_points(vtx_p):
@@ -643,8 +657,8 @@ def outfle():
         defaultextension = "xyz"
     )
 
-    ouf_vtx = os.path.splitext(ouf)[0] + "_vtx.xyz"
-    ouf_cont = os.path.splitext(ouf)[0] + "_cont.xyz"
+    ouf_vtx = os.path.splitext(ouf)[0] + "_vtx.xyz" #頂点座標を出力するファイル
+    ouf_cont = os.path.splitext(ouf)[0] + "_cont.xyz" #輪郭線分を点群で出力するファイル
     ouf_td = os.path.splitext(ouf)[0] + "_twodimension.xyz" #二次元系の頂点座標を出力するファイル
 
     vf = open(ouf_vtx, "w")
@@ -657,6 +671,14 @@ def outfle():
     output_log("\nOutput file : %s" %(ouf_vtx), True)
     output_log("Output file : %s" %(ouf_cont), True)
     output_log("Output file : %s\n" %(ouf_td), True)
+
+#重心点plot
+def grav_plot(p, g):
+
+    print("grav plot...")
+    plt.scatter(p.T[0], p.T[1])
+    plt.scatter(g[0], g[1], s=40, color="red", marker="*")
+    plt.show()
 
 # 二次元plot
 def sur_plot(p, sp):
@@ -716,7 +738,7 @@ def main():
 
     DETAIL = False #詳細を出力する
     DESCRIPTION = False #点群を描写する
-    D = 400 #分割したときに拾う点群の数（おおよそ）
+    D = 300 #分割したときに拾う点群の数の指定（おおよそ）
     pN = 1000 #輪郭を構成する点の各線分における点群の数（輪郭点不要の場合は少なくしたほうが良い）
 
     try:
@@ -759,7 +781,8 @@ def main():
         print(e)
         exit()
 
-    # 主軸推定
+    # =========================================================主軸推定=========================================================
+    
     V, V_std, w, st_pcd, d = principal_axis_estimation(x, y, z)
     Q = np.array([V[w[0]], V[w[1]], V[w[2]]]) #変換行列（x: フランジ長さ方向, y: ウェブ長さ方向, z: 主軸方向になるような変換行列にする)
 
@@ -791,16 +814,42 @@ def main():
         # 最適化
         P = minimize(obj_func, p, args=[Sp, bo], method="powell")
         parameter_output(len(Sp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "最適化", i)
-        if DESCRIPTION == True: sectional_result_plot(Sp, P, bo)
 
-        Gn[i][0], Gn[i][1] = P.x[0], P.x[1]
+        A = sectional_result_plot(Sp, P, bo) #頂点の取得
+        g = grouping(Sp, A) #グルーピング
+        g.gp_quart_range() #四分位範囲を抜き出す
+        
+        #上フランジパラメータ初期値
+        ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
+        ps = np.array([ds, A[0][1] - ds*A[0][0], A[0][1] - ds*A[0][0]])
+        PII = minimize(obj_func_flange, ps, args=[g.gp1, g.gp2], method="powell") #最適化
+
+        #ウェブパラメータ初期値
+        ds = (A[5][0] - A[4][0])/(A[5][1] - A[4][1])
+        ps = np.array([ds, A[4][0] - ds*A[4][1], A[4][0] - ds*A[4][1]])
+        PI = minimize(obj_func_web, ps, args=[g.gp3, g.gp4], method="powell") #最適化
+
+        #下フランジパラメータ初期値
+        ds = (A[4][1] - A[3][1])/(A[4][0] - A[3][0])
+        ps = np.array([ds, A[3][1] - ds*A[3][0], A[3][1] - ds*A[3][0]])
+        PIII = minimize(obj_func_flange, ps, args=[g.gp5, g.gp6], method="powell") #最適化
+        
+        PII.x, PIII.x, L = uniform_flange_thickness(PII.x, PIII.x) #フランジ厚さを調整
+
+        Gn[i][0], Gn[i][1] = cogravity_est(PI.x, PII.x, PIII.x) #重心点の推定  
+
+        if DESCRIPTION == True: grav_plot(Sp, Gn[i]) #重心点の確認
+
+        # Gn[i][0], Gn[i][1] = P.x[0], P.x[1]
         pber1.update(1)
 
     pber1.close()
 
-    rV = principal_axis_decision(Gn, ZZ, Q, w)
+    rV = principal_axis_decision(Gn, ZZ, Q, w) #各断面の主軸に対する二次元変換行列を作成
     
-    # フィッティング・特徴点取得
+
+    # =========================================================フィッティング・特徴点取得=========================================================
+
     output_log("< Fitting / Feature point acquisition >", False)
     vtx, cont = np.zeros((0, 3)), np.zeros((0, 3))
 
@@ -827,9 +876,9 @@ def main():
         parameter_output(len(rSp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "フィッティング後パラメータ", i)
         
         A = sectional_result_plot(rSp, P, bo) #頂点の取得
-        rg = grouping(rSp, A) 
+        rg = grouping(rSp, A) #グルーピング
         rg.gp_quart_range() #四分位範囲を抜き出す
-        if DESCRIPTION == True: rg.pcd_plot()
+        if DESCRIPTION == True: rg.pcd_plot(); print(i)
         
         #上フランジパラメータ初期値
         ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
@@ -891,7 +940,12 @@ def main():
 
 
 if __name__ == "__main__":
-    print(__name__)
+    print("===============================================")
+    print("noIncompletePcd.py   ( version: 1.1.1 ) ")
+    print("python 3.6.5, anaconda 4.10.3 ")
+    print("Lib: numpy:1.19.2 matplotlib:3.3.4 scipy:1.5.2")
+    print("tqdm:4.61.2 ")
+    print("===============================================\n")
     main()
     print("complete! [Enter > ]")
     input()

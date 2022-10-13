@@ -57,7 +57,7 @@ def main():
 
     global MEAN, N
 
-    MEAN = True #True -> 平均をとる　False -> 中央値をとる
+    MEAN = False #True -> 平均をとる　False -> 中央値をとる
     N = 50 #最大幅の分割数の指定
 
     inf = input_vtx()
