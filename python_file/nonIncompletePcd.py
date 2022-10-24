@@ -1,5 +1,6 @@
 # python=3.6.5 2022/08 yamashita
 
+from distutils.sysconfig import get_config_var
 import numpy as np
 import os
 import datetime
@@ -125,14 +126,14 @@ def principal_axis_estimation(x, y, z):
         st_pcd = np.zeros((len(d), 3))
 
         for i in range(len(d)):
-            st_pcd[i] = [d[i], (d[i] - G[0])*V_std[1]/V_std[0] + G[1], (d[i] - G[0])*V_std[2]/V_std[0] + G[2]]
+            st_pcd[i] = [(d[i] - G[1])*V_std[0]/V_std[1] + G[0], d[i], (d[i] - G[1])*V_std[2]/V_std[1] + G[2]]
 
     elif np.argmax(lexyz) == 2:
         d = np.arange(ixyz[5], ixyz[4], arasa)
         st_pcd = np.zeros((len(d), 3))
 
         for i in range(len(d)):
-            st_pcd[i] = [d[i], (d[i] - G[0])*V_std[1]/V_std[0] + G[1], (d[i] - G[0])*V_std[2]/V_std[0] + G[2]]
+            st_pcd[i] = [(d[i] - G[2])*V_std[0]/V_std[2] + G[0], (d[i] - G[2])*V_std[1]/V_std[2] + G[1], d[i]]
 
     if DESCRIPTION == True:
         #グラフ表示
@@ -559,7 +560,10 @@ def vertex_coordinate_detection(PI, PII, PIII, Pts, Pbs):
     vtx_p[10] = slv_equt(PII[0], PII[2], PI[0], PI[1]) #F_left
     vtx_p[11] = slv_equt(PII[0], PII[2], PI[0], PI[2]) #F_right
 
-    return vtx_p
+    # 重心座標の取得
+    G = np.array([np.mean(vtx_p.T[0][8:12]), np.mean(vtx_p.T[1][8:12])])
+
+    return vtx_p, G
 
 #y = [yd]*x + [yc], x = [xd]*y + [xc]の解を求める関数
 def slv_equt(yd, yc, xd, xc): 
@@ -604,6 +608,12 @@ def retransform_coordinate_system(p, V, Z):
         vp[i] = np.dot(inv_V, [[p[i][0]],[p[i][1]],[Z]]).T
 
     return vp
+
+# 重心座標を元の座標系に戻す
+def rc_gv(G, V, Z):
+    inv_V = np.linalg.inv(V)
+
+    return np.dot(inv_V, [[G[0]],[G[1]],[Z]]).T
 
 # 分割数の指定
 def division_number_input():
@@ -659,7 +669,7 @@ def outfle():
 
     ouf_vtx = os.path.splitext(ouf)[0] + "_vtx.xyz" #頂点座標を出力するファイル
     ouf_cont = os.path.splitext(ouf)[0] + "_cont.xyz" #輪郭線分を点群で出力するファイル
-    ouf_td = os.path.splitext(ouf)[0] + "_twodimension.xyz" #二次元系の頂点座標を出力するファイル
+    ouf_td = os.path.splitext(ouf)[0] + "_twodimension.tmp" #二次元系の頂点座標を出力するファイル
 
     vf = open(ouf_vtx, "w")
     cf = open(ouf_cont, "w")
@@ -781,6 +791,7 @@ def main():
         print(e)
         exit()
 
+
     # =========================================================主軸推定=========================================================
     
     V, V_std, w, st_pcd, d = principal_axis_estimation(x, y, z)
@@ -817,6 +828,24 @@ def main():
 
         A = sectional_result_plot(Sp, P, bo) #頂点の取得
         g = grouping(Sp, A) #グルーピング
+
+        #　実験用
+        # with open("data2_group_point_exam%d.txt" %(i), "w") as f:
+        #     f.write("%d %d %d %d %d %d\n" %(len(g.gp1), len(g.gp2), len(g.gp3), len(g.gp4), len(g.gp5), len(g.gp6)))
+        #     np.savetxt(f ,A)
+        #     np.savetxt(f, g.gp1)
+        #     np.savetxt(f, g.gp2)
+        #     np.savetxt(f, g.gp3)
+        #     np.savetxt(f, g.gp4)
+        #     np.savetxt(f, g.gp5)
+        #     np.savetxt(f, g.gp6)
+        #     np.savetxt(f, g.gp1d)
+        #     np.savetxt(f, g.gp2d)
+        #     np.savetxt(f, g.gp3d)
+        #     np.savetxt(f, g.gp4d)
+        #     np.savetxt(f, g.gp5d)
+        #     np.savetxt(f, g.gp6d)     
+
         g.gp_quart_range() #四分位範囲を抜き出す
         
         #上フランジパラメータ初期値
@@ -918,7 +947,7 @@ def main():
         Pts.x, Pbs.x, U = uniform_side_flange(Pts.x, Pbs.x, PsII.x, PsIII.x) #フランジ幅の調整
         line_segment_output(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x, i)
 
-        s_vtx = vertex_coordinate_detection(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x) #頂点を決定  
+        s_vtx, Gt = vertex_coordinate_detection(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x) #頂点を決定  
         s_seg = create_contour_points(s_vtx) #輪郭点を作成
         if DESCRIPTION == True: sur_plot(s_seg, rSp)
 
@@ -926,8 +955,11 @@ def main():
         cont = np.append(cont, retransform_coordinate_system(s_seg, rV[i], rZZ[i]), axis=0)
         if DESCRIPTION == True: V_plot(cont)
 
+        # dat_file生成用tmpファイルに書き込み
         with open(ouf_td, 'a') as f_handle:
+            np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ[i])) #三次元重心座標の保存
             np.savetxt(f_handle, s_vtx) #データの保存
+            
 
         pber2.update(1)
 
