@@ -1,6 +1,5 @@
 # python=3.6.5 2022/08 yamashita
 
-from distutils.sysconfig import get_config_var
 import numpy as np
 import os
 import datetime
