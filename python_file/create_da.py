@@ -15,7 +15,7 @@ def input_vtx():
     root = tk.Tk()
     root.withdraw()
     INF = fd.askopenfilename(
-        filetypes=[("tmp", "twodimension.tmp")]
+        filetypes=[("tmp", "new.tmp")]
     )
     DIR = os.path.split(INF)[0] + "/"
     print("%s" %(INF))
@@ -26,20 +26,25 @@ def input_vtx():
     except:
         exit("[ERROR] file %s doesn't exist." %(INF))
     
-    data = np.zeros(((int(len(row)/13), 12, 2))) #各断面ごとの頂点座標を格納
-    G_data = np.zeros((int(len(row)/13), 3)) #三次元重心データの格納
-
-    for i in range(int(len(row)/13)):
-        rowdata = row[13*i].replace("\n", "")
+    data = np.zeros(((int(len(row)/14), 12, 2))) #各断面ごとの頂点座標を格納
+    G_data = np.zeros((int(len(row)/14), 3)) #三次元重心データの格納
+    V_data = np.zeros((int(len(row)/14), 3)) #要素座標ベクトルの格納(SEAMFEM座標系では[y, z, x]で格納)
+ 
+    for i in range(int(len(row)/14)):
+        rowdata = row[14*i].replace("\n", "")
         rowdata = rowdata.split(" ")
         G_data[i] = np.array([float(rowdata[0]), float(rowdata[1]), float(rowdata[2])])
-        
+
+        rowdata = row[14*i + 1].replace("\n", "")
+        rowdata = rowdata.split(" ")
+        V_data[i] = np.array([float(rowdata[0]), float(rowdata[1]), float(rowdata[2])])
+
         for j in range(12):
-            rowdata = row[13*i + j + 1].replace("\n", "")
+            rowdata = row[14*i + j + 2].replace("\n", "")
             rowdata = rowdata.split(" ")
             data[i][j] = np.array([float(rowdata[0]), float(rowdata[1])])
 
-    return data, G_data
+    return data, G_data, V_data
 
     
 # datファイルの選択（編集するなら）
@@ -80,7 +85,7 @@ def main():
     # ====================================== 
 
 
-    data, G_data = input_vtx()
+    data, G_data, V_data = input_vtx()
     input_dat()
     select_conf()
 
@@ -120,12 +125,14 @@ def main():
         uf = np.array([np.mean(uflange.T[0]), np.mean(uflange.T[1]), np.mean(uflange.T[2]), np.mean(uflange.T[3]), np.mean(uflange.T[4]), np.mean(uflange.T[5])])
         df = np.array([np.mean(dflange.T[0]), np.mean(dflange.T[1]), np.mean(dflange.T[2]), np.mean(dflange.T[3]), np.mean(dflange.T[4]), np.mean(dflange.T[5])])
         w = np.array([np.mean(web.T[0]), np.mean(web.T[1]), np.mean(web.T[2]), np.mean(web.T[3]), np.mean(web.T[4]), np.mean(web.T[5])])
+        V_m = np.array([np.mean(V_data.T[0]), np.mean(V_data.T[1]), np.mean(V_data.T[2])])
+
     elif CS == 1:
         # 中央値をとる
         uf = np.array([np.median(uflange.T[0]), np.median(uflange.T[1]), np.median(uflange.T[2]), np.median(uflange.T[3]), np.median(uflange.T[4]), np.median(uflange.T[5])])
         df = np.array([np.median(dflange.T[0]), np.median(dflange.T[1]), np.median(dflange.T[2]), np.median(dflange.T[3]), np.median(dflange.T[4]), np.median(dflange.T[5])])
         w = np.array([np.median(web.T[0]), np.median(web.T[1]), np.median(web.T[2]), np.median(web.T[3]), np.median(web.T[4]), np.median(web.T[5])])
-
+        V_m = np.array([np.median(V_data.T[0]), np.median(V_data.T[1]), np.median(V_data.T[2])])
 
     # 分割した際に正方形状になるために縦横比から分割数を決定する。
     if CS==0 or CS==1:
@@ -207,7 +214,7 @@ def main():
                     print("{:10d}{:10d}{:10d}{:10d}{:10d}{:10d}".format(1+i, 0, 0, 1, 1+i, 2+i), file=f)
             
                 print("/sections", file=f)
-                print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(1, 1, 3, 0, "", "", 0, 0, 1, 0, 0, 0, 0, 0, 0), file = f)
+                print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(1, 1, 3, 0, "", "", V_m[2], V_m[0], V_m[1], 0, 0, 0, 0, 0, 0), file = f)
             
                 for i in range(3):
                     print("{:>10d}{:>10d}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}" .format(int(nn[i][0]), int(nn[i][1]), argm_data[i][0], argm_data[i][1], argm_data[i][2], argm_data[i][3], argm_data[i][4], argm_data[i][5], 0, 0) ,file = f)
@@ -224,7 +231,7 @@ def main():
                 
                 for i in range(len(data)):
                     print("/sections", file=f)
-                    print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(i+1, 1, 3, 0, "", "", 0, 0, 1, 0, 0, 0, 0, 0, 0), file = f)
+                    print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(i+1, 1, 3, 0, "", "", V_data[i][2], V_data[i][0], V_data[i][1], 0, 0, 0, 0, 0, 0), file = f)
                     for j in range(3):
                         print("{:>10d}{:>10d}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}" .format(int(nnn[i][j][0]), int(nnn[i][j][1]), argms_data[i][j][0], argms_data[i][j][1], argms_data[i][j][2], argms_data[i][j][3], argms_data[i][j][4], argms_data[i][j][5], 0, 0) ,file=f)
     
@@ -271,7 +278,7 @@ def main():
                     print("{:10d}{:10d}{:10d}{:10d}{:10d}{:10d}".format(1+i, 0, 0, 1, 1+i, 2+i), file=f)
 
                 print("/sections", file=f)
-                print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(1, 1, 3, 0, "", "", 0, 0, 1, 0, 0, 0, 0, 0, 0), file = f)
+                print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(1, 1, 3, 0, "", "", V_m[2], V_m[0], V_m[1], 0, 0, 0, 0, 0, 0), file = f)
             
                 for i in range(3):
                     print("{:>10d}{:>10d}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}" .format(int(nn[i][0]), int(nn[i][1]), argm_data[i][0], argm_data[i][1], argm_data[i][2], argm_data[i][3], argm_data[i][4], argm_data[i][5], 0, 0) ,file = f)
@@ -291,7 +298,7 @@ def main():
                 
                 for i in range(len(data)):
                     print("/sections", file=f)
-                    print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(i+1, 1, 3, 0, "", "", 0, 0, 1, 0, 0, 0, 0, 0, 0), file = f)
+                    print("{:>10d}{:>10d}{:>10d}{:>10d}{:>15}{:>10}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}{:>10d}".format(i+1, 1, 3, 0, "", "", V_data[i][2], V_data[i][0], V_data[i][1], 0, 0, 0, 0, 0, 0), file = f)
                     for j in range(3):
                         print("{:>10d}{:>10d}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10f}{:>10d}{:>10d}" .format(int(nnn[i][j][0]), int(nnn[i][j][1]), argms_data[i][j][0], argms_data[i][j][1], argms_data[i][j][2], argms_data[i][j][3], argms_data[i][j][4], argms_data[i][j][5], 0, 0) ,file=f)
                 

@@ -668,7 +668,7 @@ def outfle():
 
     ouf_vtx = os.path.splitext(ouf)[0] + "_vtx.xyz" #頂点座標を出力するファイル
     ouf_cont = os.path.splitext(ouf)[0] + "_cont.xyz" #輪郭線分を点群で出力するファイル
-    ouf_td = os.path.splitext(ouf)[0] + "_twodimension.tmp" #二次元系の頂点座標を出力するファイル
+    ouf_td = os.path.splitext(ouf)[0] + "_new.tmp" #SeamFEMフォーマット作成ファイル
 
     vf = open(ouf_vtx, "w")
     cf = open(ouf_cont, "w")
@@ -957,6 +957,7 @@ def main():
         # dat_file生成用tmpファイルに書き込み
         with open(ouf_td, 'a') as f_handle:
             np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ[i])) #三次元重心座標の保存
+            np.savetxt(f_handle, np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T) #要素座標ベクトルの保存
             np.savetxt(f_handle, s_vtx) #データの保存
             
 
