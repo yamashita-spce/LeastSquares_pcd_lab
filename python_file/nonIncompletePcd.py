@@ -1,5 +1,6 @@
 # python=3.6.5 2022/08 yamashita
 
+from concurrent.futures import ProcessPoolExecutor
 import numpy as np
 import os
 import datetime
@@ -9,6 +10,7 @@ import tkinter as tk
 import tkinter.filedialog as fd
 from scipy.optimize import minimize
 from tqdm import tqdm
+
 
 # グルーピングクラス
 class PcdGroup:
@@ -151,8 +153,8 @@ def principal_axis_estimation(x, y, z):
 
 
 # 断面ごとの二次元点群データを作成
-def cross_section_pcd(V, V_std, x, y, z, st_pcd, dz):
-
+def cross_section_pcd(V, V_std, x, y, z, st_pcd, dz, Nu, lexyz, D, N):
+    
     Sp = np.zeros((0, 2)) #二次元断面点群(座標変換後)
 
     #何分割目のものか -> dz
@@ -238,37 +240,37 @@ def sectional_result_plot(Spp, P, bo):
     C = np.array([E[0] - s, E[1] + t])
     D = np.array([E[0] + s, E[1] - t])
 
-    if DESCRIPTION == True:
-        komakasa = 1000
+    # if DESCRIPTION == True:
+    #     komakasa = 1000
 
-        #ベクトル方程式 -->  [x, y] = a + t*(b - a)
-        Iy = np.arange(E[1], F[1], (F[1] - E[1])/komakasa)
-        IIx = np.arange(A[0], B[0],(B[0] - A[0])/komakasa)
-        IIIx = np.arange(C[0], D[0], (D[0] - C[0])/komakasa)
+    #     #ベクトル方程式 -->  [x, y] = a + t*(b - a)
+    #     Iy = np.arange(E[1], F[1], (F[1] - E[1])/komakasa)
+    #     IIx = np.arange(A[0], B[0],(B[0] - A[0])/komakasa)
+    #     IIIx = np.arange(C[0], D[0], (D[0] - C[0])/komakasa)
 
-        leI, leII, leIII = len(Iy), len(IIx), len(IIIx)
-        I, II, III = np.zeros((leI, 2)), np.zeros((leII, 2)), np.zeros((leIII, 2))
+    #     leI, leII, leIII = len(Iy), len(IIx), len(IIIx)
+    #     I, II, III = np.zeros((leI, 2)), np.zeros((leII, 2)), np.zeros((leIII, 2))
 
-        for i in range(leI):
-            I[i][0] = E[0] + (i / leI)*(F[0] - E[0])
-            I[i][1] = Iy[i]
-        for i in range(leII):
-            II[i][0] = IIx[i]
-            II[i][1] = A[1] + (i / leII)*(B[1] - A[1])
-        for i in range(leIII):
-            III[i][0] = IIIx[i]
-            III[i][1] = C[1] +(i / leIII)*(D[1] - C[1])    
+    #     for i in range(leI):
+    #         I[i][0] = E[0] + (i / leI)*(F[0] - E[0])
+    #         I[i][1] = Iy[i]
+    #     for i in range(leII):
+    #         II[i][0] = IIx[i]
+    #         II[i][1] = A[1] + (i / leII)*(B[1] - A[1])
+    #     for i in range(leIII):
+    #         III[i][0] = IIIx[i]
+    #         III[i][1] = C[1] +(i / leIII)*(D[1] - C[1])    
 
         
-        print("\npcd plot...")
-        # plt.xlim(-1200, -1000) # x軸の表示範囲
-        # plt.ylim(-780, -720)  # y軸の表示範囲
-        plt.scatter(Spp.T[0], Spp.T[1], s=10)
-        plt.scatter(I.T[0], I.T[1], s=1, color="red")
-        plt.scatter(II.T[0], II.T[1], s=1, color="green")
-        plt.scatter(III.T[0], III.T[1], s=1, color="orange")
-        plt.scatter(P.x[0], P.x[1])
-        plt.show()
+    #     print("\npcd plot...")
+    #     # plt.xlim(-1200, -1000) # x軸の表示範囲
+    #     # plt.ylim(-780, -720)  # y軸の表示範囲
+    #     plt.scatter(Spp.T[0], Spp.T[1], s=10)
+    #     plt.scatter(I.T[0], I.T[1], s=1, color="red")
+    #     plt.scatter(II.T[0], II.T[1], s=1, color="green")
+    #     plt.scatter(III.T[0], III.T[1], s=1, color="orange")
+    #     plt.scatter(P.x[0], P.x[1])
+    #     plt.show()
 
     return(A, B, C, D, E, F)
 
@@ -407,7 +409,7 @@ def grouping(Sp, A):
             g.gp6 = np.append(g.gp6, [g.gIII[i]], axis=0) 
             g.gp6d = np.append(g.gp6d, [gd])
     
-    if DESCRIPTION == True: g.pcd_plot()
+    # if DESCRIPTION == True: g.pcd_plot()
 
     return g
 
@@ -571,7 +573,7 @@ def slv_equt(yd, yc, xd, xc):
     return x, y
 
 # 輪郭を構成する点を作成
-def create_contour_points(vtx_p):
+def create_contour_points(vtx_p, pN):
 
     def line_segment(p1, p2): #p1, p2は始点と終点
         P = np.zeros((pN, p1.shape[0]))
@@ -632,11 +634,11 @@ def division_number_input():
         exit()
 
 # ログ出力
-def output_log(txt, out):
+def output_log(txt, out, path):
 
     if out == True:
         print(txt)
-    with open(epath, "a") as ef:
+    with open(path, "a") as ef:
         ef.write(txt + "\n")
 
 #インポートファイルのpathの取得
@@ -677,9 +679,9 @@ def outfle():
     cf.close()
     tf.close()
 
-    output_log("\nOutput file : %s" %(ouf_vtx), True)
-    output_log("Output file : %s" %(ouf_cont), True)
-    output_log("Output file : %s\n" %(ouf_td), True)
+    output_log("\nOutput file : %s" %(ouf_vtx), True, epath)
+    output_log("Output file : %s" %(ouf_cont), True, epath)
+    output_log("Output file : %s\n" %(ouf_td), True, epath)
 
 #重心点plot
 def grav_plot(p, g):
@@ -711,34 +713,188 @@ def V_plot(p):
     plt.show()
 
 # パラメータのアウトプット、ログファイルへの書き込み
-def parameter_output(nn, gx, gy, h, d, du, dd, bo, string, number):
+def parameter_output(nn, gx, gy, h, d, du, dd, bo, string, number, path, DETAIL):
     
-    output_log("\n%s step = %d" %(string, number), DETAIL)
-    output_log("==========================================", DETAIL)
-    output_log("点群総数：%d" %(nn), DETAIL)
-    output_log("重心点 : ( %.4f, %.4f )" %(gx, gy), DETAIL)
-    output_log("高さ : %.4f" %(h), DETAIL)
-    output_log("座標軸との傾き : %.4f[rad]" %(d), DETAIL)
-    output_log("ウェブと上フランジの傾き : %.4fπ[rad]" %(0.5 + du/np.pi), DETAIL)
-    output_log("ウェブと下フランジの傾き : %.4fπ[rad]" %(0.5 + du/np.pi), DETAIL)
-    output_log("幅（固定値）: %.4f" %(bo), DETAIL)
-    output_log("==========================================", DETAIL)
+    output_log("\n%s step = %d" %(string, number), DETAIL, path)
+    output_log("==========================================", DETAIL, path)
+    output_log("点群総数：%d" %(nn), DETAIL, path)
+    output_log("重心点 : ( %.4f, %.4f )" %(gx, gy), DETAIL, path)
+    output_log("高さ : %.4f" %(h), DETAIL, path)
+    output_log("座標軸との傾き : %.4f[rad]" %(d), DETAIL, path)
+    output_log("ウェブと上フランジの傾き : %.4fπ[rad]" %(0.5 + du/np.pi), DETAIL, path)
+    output_log("ウェブと下フランジの傾き : %.4fπ[rad]" %(0.5 + du/np.pi), DETAIL, path)
+    output_log("幅（固定値）: %.4f" %(bo), DETAIL, path)
+    output_log("==========================================", DETAIL, path)
 
-def line_segment_output(pI, pII, pIII, pts, pbs, number):
+def line_segment_output(pI, pII, pIII, pts, pbs, number, DETAIL, path):
 
-    output_log("\n線分推定結果 step = %d" %(number), DETAIL)
-    output_log("\n============================", DETAIL)
-    output_log("I': x = %.3fy + %.3f" %(pI[0], pI[1]), DETAIL)
-    output_log("I'': x = %.3fy + %.3f" %(pI[0], pI[2]), DETAIL)
-    output_log("II': y = %.3fx + %.3f" %(pII[0], pII[1]), DETAIL)
-    output_log("II'': y = %.3fx + %.3f" %(pII[0], pII[2]), DETAIL)
-    output_log("III': y = %.3fx + %.3f" %(pIII[0], pIII[1]), DETAIL)
-    output_log("III'': y = %.3fx + %.3f" %(pIII[0], pIII[2]), DETAIL)
-    output_log("IIL : x = %.3fy + %.3f" %(-pII[0], pts[0]), DETAIL)
-    output_log("IIR : x = %.3fy + %.3f" %(-pII[0], pts[1]), DETAIL)
-    output_log("IIIL : x = %.3fy + %.3f" %(-pIII[0], pbs[0]), DETAIL)
-    output_log("IIIR : x = %.3fy + %.3f" %(-pIII[0], pbs[1]), DETAIL)
-    output_log("==============================", DETAIL)
+    output_log("\n線分推定結果 step = %d" %(number), DETAIL, path)
+    output_log("\n============================", DETAIL, path)
+    output_log("I': x = %.3fy + %.3f" %(pI[0], pI[1]), DETAIL, path)
+    output_log("I'': x = %.3fy + %.3f" %(pI[0], pI[2]), DETAIL, path)
+    output_log("II': y = %.3fx + %.3f" %(pII[0], pII[1]), DETAIL, path)
+    output_log("II'': y = %.3fx + %.3f" %(pII[0], pII[2]), DETAIL, path)
+    output_log("III': y = %.3fx + %.3f" %(pIII[0], pIII[1]), DETAIL, path)
+    output_log("III'': y = %.3fx + %.3f" %(pIII[0], pIII[2]), DETAIL, path)
+    output_log("IIL : x = %.3fy + %.3f" %(-pII[0], pts[0]), DETAIL, path)
+    output_log("IIR : x = %.3fy + %.3f" %(-pII[0], pts[1]), DETAIL, path)
+    output_log("IIIL : x = %.3fy + %.3f" %(-pIII[0], pbs[0]), DETAIL, path)
+    output_log("IIIR : x = %.3fy + %.3f" %(-pIII[0], pbs[1]), DETAIL, path)
+    output_log("==============================", DETAIL, path)
+
+# 重視推定処理
+def fn(i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL):
+    
+    # 断面点群の取得（二次元系）
+    Sp, ZZ = cross_section_pcd(Q, V_std, x, y, z, st_pcd, i, Nu, lexyz, D, N)
+
+    #断面点群が存在しない場合
+    if len(Sp) == 0: 
+        output_log("\n[WARNING] '%d' Point cloud does not exist near reference cross section " %(i), True, epath)
+        return np.zeros(2), ZZ, i
+        
+    if DESCRIPTION == True: plt.scatter(Sp.T[0], Sp.T[1]); plt.show()
+
+    # パラメータ初期値の設定　p = [Gx, Gy, h, rad] pxy = [x, y]
+    p = np.array([np.average(Sp.T[0]), np.average(Sp.T[1]), np.abs(np.max(Sp.T[1]) - np.min(Sp.T[1])), 0, 0, 0])
+    bo = np.abs(np.max(Sp.T[0]) - np.min(Sp.T[0]))
+    parameter_output(len(Sp), p[0], p[1], p[2], 0, 0, 0, bo, "初期値", i, epath, DETAIL)
+
+    # 最適化
+    P = minimize(obj_func, p, args=[Sp, bo], method="powell")
+    parameter_output(len(Sp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "最適化", i, epath, DETAIL)
+
+    A = sectional_result_plot(Sp, P, bo) #頂点の取得
+    g = grouping(Sp, A) #グルーピング
+
+    #　実験用
+    # with open("data3_group_point_exam%d.txt" %(i), "w") as f:
+    #     f.write("%d %d %d %d %d %d\n" %(len(g.gp1), len(g.gp2), len(g.gp3), len(g.gp4), len(g.gp5), len(g.gp6)))
+    #     np.savetxt(f ,A)
+    #     np.savetxt(f, g.gp1)
+    #     np.savetxt(f, g.gp2)
+    #     np.savetxt(f, g.gp3)
+    #     np.savetxt(f, g.gp4)
+    #     np.savetxt(f, g.gp5)
+    #     np.savetxt(f, g.gp6)
+    #     np.savetxt(f, g.gp1d)
+    #     np.savetxt(f, g.gp2d)
+    #     np.savetxt(f, g.gp3d)
+    #     np.savetxt(f, g.gp4d)
+    #     np.savetxt(f, g.gp5d)
+    #     np.savetxt(f, g.gp6d)     
+
+    g.gp_quart_range() #四分位範囲を抜き出す
+        
+    #上フランジパラメータ初期値
+    ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
+    ps = np.array([ds, A[0][1] - ds*A[0][0], A[0][1] - ds*A[0][0]])
+    PII = minimize(obj_func_flange, ps, args=[g.gp1, g.gp2], method="powell") #最適化
+
+    #ウェブパラメータ初期値
+    ds = (A[5][0] - A[4][0])/(A[5][1] - A[4][1])
+    ps = np.array([ds, A[4][0] - ds*A[4][1], A[4][0] - ds*A[4][1]])
+    PI = minimize(obj_func_web, ps, args=[g.gp3, g.gp4], method="powell") #最適化
+
+    #下フランジパラメータ初期値
+    ds = (A[4][1] - A[3][1])/(A[4][0] - A[3][0])
+    ps = np.array([ds, A[3][1] - ds*A[3][0], A[3][1] - ds*A[3][0]])
+    PIII = minimize(obj_func_flange, ps, args=[g.gp5, g.gp6], method="powell") #最適化
+        
+    PII.x, PIII.x, L = uniform_flange_thickness(PII.x, PIII.x) #フランジ厚さを調整
+
+    #推定重心点、断面法線、インデックスを返す
+    return cogravity_est(PI.x, PII.x, PIII.x), ZZ, i
+
+
+# 配列を整理
+def sorting(G, Z, idx):
+    sG, sZ = np.zeros((len(idx), 2)), np.zeros(len(idx))
+
+    for i in range(len(idx)):
+        sG[i], sZ[i] = G[idx[i]], Z[idx[i]]
+    
+    return sG, sZ
+
+
+# フィッティング処理
+def fn_fit(i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, ouf_td, pN):
+    
+    if(np.all(rV[i]) == 0):
+        return np.zeros((1, 3)), np.zeros((1, 3)), -1
+        
+    # 断面点群の取得（二次元系）
+    rSp, rZZ = cross_section_pcd(rV[i], rV[i][2], x, y, z, st_pcd, i, Nu, lexyz, D, N)
+    if DESCRIPTION == True: plt.scatter(rSp.T[0], rSp.T[1]); plt.show()
+
+    # パラメータ初期値の設定　p = [Gx, Gy, h, rad] pxy = [x, y]
+    p = np.array([np.average(rSp.T[0]), np.average(rSp.T[1]), np.abs(np.max(rSp.T[1]) - np.min(rSp.T[1])), 0, 0, 0])
+    bo = np.abs(np.max(rSp.T[0]) - np.min(rSp.T[0]))
+    parameter_output(len(rSp), p[0], p[1], p[2], 0, 0, 0, bo, "初期値", i, epath, DETAIL)
+
+    # 最適化
+    P = minimize(obj_func, p, args=[rSp, bo], method="powell")
+    parameter_output(len(rSp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "フィッティング後パラメータ", i, epath, DETAIL)
+        
+    A = sectional_result_plot(rSp, P, bo) #頂点の取得
+    rg = grouping(rSp, A) #グルーピング
+    rg.gp_quart_range() #四分位範囲を抜き出す
+    if DESCRIPTION == True: rg.pcd_plot(); print(i)
+        
+    #上フランジパラメータ初期値
+    ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
+    ps = np.array([ds, A[0][1] - ds*A[0][0], A[0][1] - ds*A[0][0]])
+    PsII = minimize(obj_func_flange, ps, args=[rg.gp1, rg.gp2], method="powell") #最適化
+        
+    #ウェブパラメータ初期値
+    ds = (A[5][0] - A[4][0])/(A[5][1] - A[4][1])
+    ps = np.array([ds, A[4][0] - ds*A[4][1], A[4][0] - ds*A[4][1]])
+    PsI = minimize(obj_func_web, ps, args=[rg.gp3, rg.gp4], method="powell") #最適化
+        
+    #下フランジパラメータ初期値
+    ds = (A[4][1] - A[3][1])/(A[4][0] - A[3][0])
+    ps = np.array([ds, A[3][1] - ds*A[3][0], A[3][1] - ds*A[3][0]])
+    PsIII = minimize(obj_func_flange, ps, args=[rg.gp5, rg.gp6], method="powell") #最適化
+        
+    PsII.x, PsIII.x, L = uniform_flange_thickness(PsII.x, PsIII.x) #フランジ厚さを調整
+        
+    #上フランジの横面を構成する点
+    tpLp, tpRp = side_flange(rg.gII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsII.x[0], (PsII.x[1]+PsII.x[2])/2, L)
+    #下フランジの横面を構成する点
+    bmLp, bmRp = side_flange(rg.gIII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsIII.x[0], (PsIII.x[1]+PsIII.x[2])/2, L)
+        
+    if len(tpLp) == 0 or len(tpRp) == 0 or len(bmLp) == 0 or len(bmRp) == 0:
+        output_log("[WARNING] '%d' Point cloud for the flange side does not exist. Resolved by increasing the number of point clouds" %(i), True, epath) 
+        return np.zeros((1, 3)), np.zeros((1, 3)), -1
+
+    #上フランジ横面パラメータ初期値
+    tc = np.array([tpLp[0][0], tpRp[0][0]])
+    Pts = minimize(obj_func_side_flange, tc, args=[tpLp, tpRp, PsII.x[0]], method="powell") #最適化   
+
+    #下フランジ横面パラメータ初期値
+    tc = np.array([bmLp[0][0], bmRp[0][0]])
+    Pbs = minimize(obj_func_side_flange, tc, args=[bmLp, bmRp, PsIII.x[0]], method="powell") #最適化   
+
+    Pts.x, Pbs.x, U = uniform_side_flange(Pts.x, Pbs.x, PsII.x, PsIII.x) #フランジ幅の調整
+    line_segment_output(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x, i, DETAIL, epath)
+
+    s_vtx, Gt = vertex_coordinate_detection(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x) #頂点を決定  
+    s_seg = create_contour_points(s_vtx, pN) #輪郭点を作成
+    if DESCRIPTION == True: sur_plot(s_seg, rSp)
+
+    # 三次元に変換
+    vtx = retransform_coordinate_system(s_vtx, rV[i], rZZ)
+    cont = retransform_coordinate_system(s_seg, rV[i], rZZ)
+
+    # dat_file生成用tmpファイルに書き込み
+    with open(ouf_td, 'a') as f_handle:
+        np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ)) #三次元重心座標の保存
+        np.savetxt(f_handle, np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T) #要素座標ベクトルの保存
+        np.savetxt(f_handle, s_vtx) #二次元断面データの保存
+
+    # 特徴点座標、輪郭座標、インデックスを返す
+    return vtx, cont, i
+            
 
 
 def main(): 
@@ -747,7 +903,7 @@ def main():
 
     DETAIL = False #詳細を出力する
     DESCRIPTION = False #点群を描写する
-    D = 300 #分割したときに拾う点群の数の指定（おおよそ）
+    D = 400 #分割したときに拾う点群の数の指定（おおよそ）
     pN = 1000 #輪郭を構成する点の各線分における点群の数（輪郭点不要の場合は少なくしたほうが良い）
 
     try:
@@ -771,9 +927,9 @@ def main():
         etxt = open(epath, mode='w')
         etxt.close()
 
-        output_log("Input file : %s" %(input_file), False)
-        output_log("Total number of pcd : %d\n" %(len(xyz)), True)
-        output_log("log file path : %s\n" %(epath), True)
+        output_log("Input file : %s" %(input_file), False, epath)
+        output_log("Total number of pcd : %d\n" %(len(xyz)), True, epath)
+        output_log("log file path : %s\n" %(epath), True, epath)
 
         # 書き込みファイルの作成、指定
         outfle()
@@ -796,184 +952,56 @@ def main():
     V, V_std, w, st_pcd, d = principal_axis_estimation(x, y, z)
     Q = np.array([V[w[0]], V[w[1]], V[w[2]]]) #変換行列（x: フランジ長さ方向, y: ウェブ長さ方向, z: 主軸方向になるような変換行列にする)
 
-    # 重心推定
-    output_log("< center of gravity estimation >", False)
-    ZZ, Gn = np.zeros(Nu), np.zeros((Nu, 2))
-    pber1 = tqdm(total = Nu)
+    output_log("< center of gravity estimation >", False, epath)
+    Gn, ZZ = np.zeros((0, 2)), np.zeros(0)
+    
+    with tqdm(total=Nu) as progress:
+        # 並列処理
+        with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:  # -----(2)
+            futures = []
+            for i in range(Nu):
+                future = executor.submit(fn, i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL)
+                future.add_done_callback(lambda p: progress.update()) 
+                futures.append(future)
 
-    for i in range(Nu):
-        pber1.set_description("center of gravity estimation")
-
-        # 断面点群の取得（二次元系）
-        Sp, ZZ[i] = cross_section_pcd(Q, V_std, x, y, z, st_pcd, i)
-
-        #断面点群が存在しない場合
-        if len(Sp) == 0: 
-            output_log("\n[WARNING] '%d' Point cloud does not exist near reference cross section " %(i), True)
-            Gn[i][0], Gn[i][1] = 0, 0
-            pber1.update(1)
-            continue
-        
-        if DESCRIPTION == True: plt.scatter(Sp.T[0], Sp.T[1]); plt.show()
-
-        # パラメータ初期値の設定　p = [Gx, Gy, h, rad] pxy = [x, y]
-        p = np.array([np.average(Sp.T[0]), np.average(Sp.T[1]), np.abs(np.max(Sp.T[1]) - np.min(Sp.T[1])), 0, 0, 0])
-        bo = np.abs(np.max(Sp.T[0]) - np.min(Sp.T[0]))
-        parameter_output(len(Sp), p[0], p[1], p[2], 0, 0, 0, bo, "初期値", i)
-
-        # 最適化
-        P = minimize(obj_func, p, args=[Sp, bo], method="powell")
-        parameter_output(len(Sp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "最適化", i)
-
-        A = sectional_result_plot(Sp, P, bo) #頂点の取得
-        g = grouping(Sp, A) #グルーピング
-
-        #　実験用
-        # with open("data2_group_point_exam%d.txt" %(i), "w") as f:
-        #     f.write("%d %d %d %d %d %d\n" %(len(g.gp1), len(g.gp2), len(g.gp3), len(g.gp4), len(g.gp5), len(g.gp6)))
-        #     np.savetxt(f ,A)
-        #     np.savetxt(f, g.gp1)
-        #     np.savetxt(f, g.gp2)
-        #     np.savetxt(f, g.gp3)
-        #     np.savetxt(f, g.gp4)
-        #     np.savetxt(f, g.gp5)
-        #     np.savetxt(f, g.gp6)
-        #     np.savetxt(f, g.gp1d)
-        #     np.savetxt(f, g.gp2d)
-        #     np.savetxt(f, g.gp3d)
-        #     np.savetxt(f, g.gp4d)
-        #     np.savetxt(f, g.gp5d)
-        #     np.savetxt(f, g.gp6d)     
-
-        g.gp_quart_range() #四分位範囲を抜き出す
-        
-        #上フランジパラメータ初期値
-        ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
-        ps = np.array([ds, A[0][1] - ds*A[0][0], A[0][1] - ds*A[0][0]])
-        PII = minimize(obj_func_flange, ps, args=[g.gp1, g.gp2], method="powell") #最適化
-
-        #ウェブパラメータ初期値
-        ds = (A[5][0] - A[4][0])/(A[5][1] - A[4][1])
-        ps = np.array([ds, A[4][0] - ds*A[4][1], A[4][0] - ds*A[4][1]])
-        PI = minimize(obj_func_web, ps, args=[g.gp3, g.gp4], method="powell") #最適化
-
-        #下フランジパラメータ初期値
-        ds = (A[4][1] - A[3][1])/(A[4][0] - A[3][0])
-        ps = np.array([ds, A[3][1] - ds*A[3][0], A[3][1] - ds*A[3][0]])
-        PIII = minimize(obj_func_flange, ps, args=[g.gp5, g.gp6], method="powell") #最適化
-        
-        PII.x, PIII.x, L = uniform_flange_thickness(PII.x, PIII.x) #フランジ厚さを調整
-
-        Gn[i][0], Gn[i][1] = cogravity_est(PI.x, PII.x, PIII.x) #重心点の推定  
-
-        if DESCRIPTION == True: grav_plot(Sp, Gn[i]) #重心点の確認
-
-        # Gn[i][0], Gn[i][1] = P.x[0], P.x[1]
-        pber1.update(1)
-
-    pber1.close()
+            # 結果を格納
+            Gn = np.append(Gn, [f.result()[0] for f in futures], axis=0)
+            ZZ = np.append(ZZ, [f.result()[1] for f in futures])
+            idx = [int(f.result()[2]) for f in futures]
+            Gn, ZZ = sorting(Gn, ZZ, idx)
 
     rV = principal_axis_decision(Gn, ZZ, Q, w) #各断面の主軸に対する二次元変換行列を作成
-    
+
 
     # =========================================================フィッティング・特徴点取得=========================================================
 
-    output_log("< Fitting / Feature point acquisition >", False)
+    output_log("< Fitting / Feature point acquisition >", False, epath)
     vtx, cont = np.zeros((0, 3)), np.zeros((0, 3))
-
-    rZZ = np.zeros(Nu) #系におけるz座標
-    pber2 = tqdm(total = Nu)
-
-    for i in range(Nu):
-        pber2.set_description("Fitting / Feature point acquisition")
-        if(np.all(rV[i]) == 0):
-            pber2.update(1)
-            continue
-        
-        # 断面点群の取得（二次元系）
-        rSp, rZZ[i] = cross_section_pcd(rV[i], rV[i][2], x, y, z, st_pcd, i)
-        if DESCRIPTION == True: plt.scatter(rSp.T[0], rSp.T[1]); plt.show()
-
-        # パラメータ初期値の設定　p = [Gx, Gy, h, rad] pxy = [x, y]
-        p = np.array([np.average(rSp.T[0]), np.average(rSp.T[1]), np.abs(np.max(rSp.T[1]) - np.min(rSp.T[1])), 0, 0, 0])
-        bo = np.abs(np.max(rSp.T[0]) - np.min(rSp.T[0]))
-        parameter_output(len(rSp), p[0], p[1], p[2], 0, 0, 0, bo, "初期値", i)
-
-        # 最適化
-        P = minimize(obj_func, p, args=[rSp, bo], method="powell")
-        parameter_output(len(rSp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "フィッティング後パラメータ", i)
-        
-        A = sectional_result_plot(rSp, P, bo) #頂点の取得
-        rg = grouping(rSp, A) #グルーピング
-        rg.gp_quart_range() #四分位範囲を抜き出す
-        if DESCRIPTION == True: rg.pcd_plot(); print(i)
-        
-        #上フランジパラメータ初期値
-        ds = (A[1][1] - A[0][1])/(A[1][0] - A[0][0])
-        ps = np.array([ds, A[0][1] - ds*A[0][0], A[0][1] - ds*A[0][0]])
-        PsII = minimize(obj_func_flange, ps, args=[rg.gp1, rg.gp2], method="powell") #最適化
-        
-        #ウェブパラメータ初期値
-        ds = (A[5][0] - A[4][0])/(A[5][1] - A[4][1])
-        ps = np.array([ds, A[4][0] - ds*A[4][1], A[4][0] - ds*A[4][1]])
-        PsI = minimize(obj_func_web, ps, args=[rg.gp3, rg.gp4], method="powell") #最適化
-        
-        #下フランジパラメータ初期値
-        ds = (A[4][1] - A[3][1])/(A[4][0] - A[3][0])
-        ps = np.array([ds, A[3][1] - ds*A[3][0], A[3][1] - ds*A[3][0]])
-        PsIII = minimize(obj_func_flange, ps, args=[rg.gp5, rg.gp6], method="powell") #最適化
-        
-        PsII.x, PsIII.x, L = uniform_flange_thickness(PsII.x, PsIII.x) #フランジ厚さを調整
-        
-        #上フランジの横面を構成する点
-        tpLp, tpRp = side_flange(rg.gII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsII.x[0], (PsII.x[1]+PsII.x[2])/2, L)
-        #下フランジの横面を構成する点
-        bmLp, bmRp = side_flange(rg.gIII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsIII.x[0], (PsIII.x[1]+PsIII.x[2])/2, L)
-        
-        if len(tpLp) == 0 or len(tpRp) == 0 or len(bmLp) == 0 or len(bmRp) == 0:
-            output_log("[WARNING] '%d' Point cloud for the flange side does not exist. Resolved by increasing the number of point clouds" %(i), True) 
-            pber2.update(1)
-            continue
-
-        #上フランジ横面パラメータ初期値
-        tc = np.array([tpLp[0][0], tpRp[0][0]])
-        Pts = minimize(obj_func_side_flange, tc, args=[tpLp, tpRp, PsII.x[0]], method="powell") #最適化   
-
-        #下フランジ横面パラメータ初期値
-        tc = np.array([bmLp[0][0], bmRp[0][0]])
-        Pbs = minimize(obj_func_side_flange, tc, args=[bmLp, bmRp, PsIII.x[0]], method="powell") #最適化   
-
-        Pts.x, Pbs.x, U = uniform_side_flange(Pts.x, Pbs.x, PsII.x, PsIII.x) #フランジ幅の調整
-        line_segment_output(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x, i)
-
-        s_vtx, Gt = vertex_coordinate_detection(PsI.x, PsII.x, PsIII.x, Pts.x, Pbs.x) #頂点を決定  
-        s_seg = create_contour_points(s_vtx) #輪郭点を作成
-        if DESCRIPTION == True: sur_plot(s_seg, rSp)
-
-        vtx = np.append(vtx, retransform_coordinate_system(s_vtx, rV[i], rZZ[i]), axis=0)
-        cont = np.append(cont, retransform_coordinate_system(s_seg, rV[i], rZZ[i]), axis=0)
-        if DESCRIPTION == True: V_plot(cont)
-
-        # dat_file生成用tmpファイルに書き込み
-        with open(ouf_td, 'a') as f_handle:
-            np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ[i])) #三次元重心座標の保存
-            np.savetxt(f_handle, np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T) #要素座標ベクトルの保存
-            np.savetxt(f_handle, s_vtx) #データの保存
+    # rZZ = np.zeros(Nu) #系におけるz座標
+   
+    with tqdm(total=Nu) as progress:
+        # 並列処理
+        with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
+            futures = []
+            for i in range(Nu):
+                future = executor.submit(fn_fit, i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, ouf_td, pN)
+                future.add_done_callback(lambda p: progress.update()) 
+                futures.append(future)
+                
+            # 結果を格納
+            for i in range(Nu):
+                if futures[i].result()[2] != -1:
+                    vtx = np.append(vtx, futures[i].result()[0], axis=0)
+                    cont = np.append(cont, futures[i].result()[1], axis=0)
             
-
-        pber2.update(1)
-
-    pber2.close()
-    
     # データの保存
     np.savetxt(ouf_vtx, vtx)
     np.savetxt(ouf_cont, cont)
-    
 
 
 if __name__ == "__main__":
     print("===============================================")
-    print("noIncompletePcd.py   ( version: 1.1.1 ) ")
+    print("noIncompletePcd.py   ( version: 1.3.0 ) ")
     print("python 3.6.5, anaconda 4.10.3 ")
     print("Lib: numpy:1.19.2 matplotlib:3.3.4 scipy:1.5.2")
     print("tqdm:4.61.2 ")
