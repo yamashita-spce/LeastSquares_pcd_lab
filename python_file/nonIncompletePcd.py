@@ -74,6 +74,46 @@ class PcdGroup:
         plt.scatter(self.gp6.T[0], self.gp6.T[1], color="purple")
         plt.show()
 
+# tmpfile output用
+class tmpData:
+
+    num = None #格納番号
+    G = np.zeros((0, 3)) #三次元重心座標
+    eN = np.zeros((0, 3)) # 要素座標ベクトル
+    Sp = np.zeros((0, 2)) # 二次元断面データ
+
+    def __init__(self, i = -1, g = np.zeros((0, 3)), en = np.zeros((0, 3)), sp = np.zeros((0, 2))):
+        self.num = i
+        self.G = g
+        self.eN = en
+        self.Sp = sp
+
+
+# tmpfileの配列を持つクラス
+class tmpDatas:
+
+    data = [] #tmpDataクラスの配列
+
+    def addData(self, tmpData):
+        self.data.append(tmpData)
+    
+    # 格納番号の昇順にソートしてtmpfileに書き込む
+    def output(self, n, ouf): #nは断面フィッティング総回数
+        sortData = []
+
+        for i in range(n):
+            for j in range(len(self.data)):
+                if self.data[j].num == i:
+                    sortData.append(self.data[j])
+                    break
+        
+        for i in range(len(sortData)):
+
+            with open(ouf, 'a') as f_handle:
+                np.savetxt(f_handle, sortData[i].G) #三次元重心座標の保存
+                np.savetxt(f_handle, sortData[i].eN) #要素座標ベクトルの保存
+                np.savetxt(f_handle, sortData[i].Sp) #二次元断の保存
+
 
 # 主軸推定関数
 def principal_axis_estimation(x, y, z):
@@ -768,7 +808,7 @@ def fn(i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL
     g = grouping(Sp, A) #グルーピング
 
     #　実験用
-    # with open("data3_group_point_exam%d.txt" %(i), "w") as f:
+    # with open("data4_group_point_exam%d.txt" %(i), "w") as f:
     #     f.write("%d %d %d %d %d %d\n" %(len(g.gp1), len(g.gp2), len(g.gp3), len(g.gp4), len(g.gp5), len(g.gp6)))
     #     np.savetxt(f ,A)
     #     np.savetxt(f, g.gp1)
@@ -812,16 +852,20 @@ def sorting(G, Z, idx):
     sG, sZ = np.zeros((len(idx), 2)), np.zeros(len(idx))
 
     for i in range(len(idx)):
-        sG[i], sZ[i] = G[idx[i]], Z[idx[i]]
+        for j in range(len(idx)):
+            if idx[j] == i:
+                sG[i], sZ[i] = G[j], Z[j]
+                break
     
     return sG, sZ
 
 
 # フィッティング処理
-def fn_fit(i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, ouf_td, pN):
+def fn_fit(i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, pN):
     
+    # 断面付近に点がなく重心座標を推定できなかった場合
     if(np.all(rV[i]) == 0):
-        return np.zeros((1, 3)), np.zeros((1, 3)), -1
+        return np.zeros((1, 3)), np.zeros((1, 3)), -1, tmpData()
         
     # 断面点群の取得（二次元系）
     rSp, rZZ = cross_section_pcd(rV[i], rV[i][2], x, y, z, st_pcd, i, Nu, lexyz, D, N)
@@ -862,10 +906,11 @@ def fn_fit(i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, 
     tpLp, tpRp = side_flange(rg.gII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsII.x[0], (PsII.x[1]+PsII.x[2])/2, L)
     #下フランジの横面を構成する点
     bmLp, bmRp = side_flange(rg.gIII, PsI.x[0], (PsI.x[1] + PsI.x[2])/2, PsIII.x[0], (PsIII.x[1]+PsIII.x[2])/2, L)
-        
+    
+    # 横面を構成する点群が存在しない場合
     if len(tpLp) == 0 or len(tpRp) == 0 or len(bmLp) == 0 or len(bmRp) == 0:
         output_log("[WARNING] '%d' Point cloud for the flange side does not exist. Resolved by increasing the number of point clouds" %(i), True, epath) 
-        return np.zeros((1, 3)), np.zeros((1, 3)), -1
+        return np.zeros((1, 3)), np.zeros((1, 3)), -1, tmpData()
 
     #上フランジ横面パラメータ初期値
     tc = np.array([tpLp[0][0], tpRp[0][0]])
@@ -887,13 +932,15 @@ def fn_fit(i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, 
     cont = retransform_coordinate_system(s_seg, rV[i], rZZ)
 
     # dat_file生成用tmpファイルに書き込み
-    with open(ouf_td, 'a') as f_handle:
-        np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ)) #三次元重心座標の保存
-        np.savetxt(f_handle, np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T) #要素座標ベクトルの保存
-        np.savetxt(f_handle, s_vtx) #二次元断面データの保存
+    # with open(ouf_td, 'a') as f_handle:
+    #     np.savetxt(f_handle, rc_gv(Gt, rV[i], rZZ)) #三次元重心座標の保存
+    #     np.savetxt(f_handle, np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T) #要素座標ベクトルの保存
+    #     np.savetxt(f_handle, s_vtx) #二次元断面データの保存
 
-    # 特徴点座標、輪郭座標、インデックスを返す
-    return vtx, cont, i
+    tmpdata = tmpData(i, rc_gv(Gt, rV[i], rZZ), np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T, s_vtx)
+
+    # 特徴点座標、輪郭座標、インデックス, tmpDataクラスを返す
+    return vtx, cont, i, tmpdata
             
 
 
@@ -956,19 +1003,20 @@ def main():
     Gn, ZZ = np.zeros((0, 2)), np.zeros(0)
     
     with tqdm(total=Nu) as progress:
+        futures = []
+
         # 並列処理
         with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:  # -----(2)
-            futures = []
             for i in range(Nu):
                 future = executor.submit(fn, i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL)
                 future.add_done_callback(lambda p: progress.update()) 
                 futures.append(future)
 
-            # 結果を格納
-            Gn = np.append(Gn, [f.result()[0] for f in futures], axis=0)
-            ZZ = np.append(ZZ, [f.result()[1] for f in futures])
-            idx = [int(f.result()[2]) for f in futures]
-            Gn, ZZ = sorting(Gn, ZZ, idx)
+        # 結果を格納
+        Gn = np.append(Gn, [f.result()[0] for f in futures], axis=0)
+        ZZ = np.append(ZZ, [f.result()[1] for f in futures])
+        idx = [int(f.result()[2]) for f in futures]
+        Gn, ZZ = sorting(Gn, ZZ, idx)
 
     rV = principal_axis_decision(Gn, ZZ, Q, w) #各断面の主軸に対する二次元変換行列を作成
 
@@ -980,28 +1028,37 @@ def main():
     # rZZ = np.zeros(Nu) #系におけるz座標
    
     with tqdm(total=Nu) as progress:
+        futures = []
+        tmpdatas = tmpDatas()
+
         # 並列処理
         with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
-            futures = []
+            
             for i in range(Nu):
-                future = executor.submit(fn_fit, i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, ouf_td, pN)
+                future = executor.submit(fn_fit, i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, pN)
                 future.add_done_callback(lambda p: progress.update()) 
                 futures.append(future)
                 
-            # 結果を格納
-            for i in range(Nu):
-                if futures[i].result()[2] != -1:
-                    vtx = np.append(vtx, futures[i].result()[0], axis=0)
-                    cont = np.append(cont, futures[i].result()[1], axis=0)
+        # 結果を格納
+        for i in range(Nu):
+            # print(futures[i].result()[2])
+            if futures[i].result()[2] != -1:
+                vtx = np.append(vtx, futures[i].result()[0], axis=0)
+                cont = np.append(cont, futures[i].result()[1], axis=0)
+                tmpdatas.addData(futures[i].result()[3])
+                
+                    
             
     # データの保存
     np.savetxt(ouf_vtx, vtx)
     np.savetxt(ouf_cont, cont)
+    # tmpfileに出力
+    tmpdatas.output(Nu, ouf_td)
 
 
 if __name__ == "__main__":
     print("===============================================")
-    print("noIncompletePcd.py   ( version: 1.3.0 ) ")
+    print("noIncompletePcd.py   ( version: 1.3.1 ) ")
     print("python 3.6.5, anaconda 4.10.3 ")
     print("Lib: numpy:1.19.2 matplotlib:3.3.4 scipy:1.5.2")
     print("tqdm:4.61.2 ")
@@ -1009,3 +1066,4 @@ if __name__ == "__main__":
     main()
     print("complete! [Enter > ]")
     input()
+
