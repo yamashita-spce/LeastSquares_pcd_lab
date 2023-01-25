@@ -10,7 +10,7 @@ import tkinter as tk
 import tkinter.filedialog as fd
 from scipy.optimize import minimize
 from tqdm import tqdm
-
+import extension_typeT as eT
 
 # グルーピングクラス
 class PcdGroup:
@@ -113,6 +113,16 @@ class tmpDatas:
                 np.savetxt(f_handle, sortData[i].G) #三次元重心座標の保存
                 np.savetxt(f_handle, sortData[i].eN) #要素座標ベクトルの保存
                 np.savetxt(f_handle, sortData[i].Sp) #二次元断の保存
+    
+    # ソートせずに保存
+    def save(self, ouf):
+
+        for i in range(len(self.data)):
+    
+            with open(ouf, 'a') as f_handle:
+                np.savetxt(f_handle, self.data[i].G) #三次元重心座標の保存
+                np.savetxt(f_handle, self.data[i].eN) #要素座標ベクトルの保存
+                np.savetxt(f_handle, self.data[i].Sp) #二次元断の保存
 
 
 # 主軸推定関数
@@ -301,7 +311,6 @@ def sectional_result_plot(Spp, P, bo):
     #         III[i][0] = IIIx[i]
     #         III[i][1] = C[1] +(i / leIII)*(D[1] - C[1])    
 
-        
     #     print("\npcd plot...")
     #     # plt.xlim(-1200, -1000) # x軸の表示範囲
     #     # plt.ylim(-780, -720)  # y軸の表示範囲
@@ -782,7 +791,7 @@ def line_segment_output(pI, pII, pIII, pts, pbs, number, DETAIL, path):
     output_log("IIIR : x = %.3fy + %.3f" %(-pIII[0], pbs[1]), DETAIL, path)
     output_log("==============================", DETAIL, path)
 
-# 重視推定処理
+# 重心推定処理
 def fn(i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL):
     
     # 断面点群の取得（二次元系）
@@ -803,6 +812,7 @@ def fn(i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL
     # 最適化
     P = minimize(obj_func, p, args=[Sp, bo], method="powell")
     parameter_output(len(Sp), P.x[0], P.x[1], P.x[2], P.x[3], P.x[4], P.x[5], bo, "最適化", i, epath, DETAIL)
+    # print(P);
 
     A = sectional_result_plot(Sp, P, bo) #頂点の取得
     g = grouping(Sp, A) #グルーピング
@@ -992,78 +1002,167 @@ def main():
     except Exception as e:
         print(e)
         exit()
-
-
-    # =========================================================主軸推定=========================================================
     
     V, V_std, w, st_pcd, d = principal_axis_estimation(x, y, z)
     Q = np.array([V[w[0]], V[w[1]], V[w[2]]]) #変換行列（x: フランジ長さ方向, y: ウェブ長さ方向, z: 主軸方向になるような変換行列にする)
 
-    output_log("< center of gravity estimation >", False, epath)
-    Gn, ZZ = np.zeros((0, 2)), np.zeros(0)
-    
-    with tqdm(total=Nu) as progress:
-        futures = []
 
-        # 並列処理
-        with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:  # -----(2)
+#    ========================================================= H or T =========================================================
+    # 断面点群の取得（二次元系）
+    sp, Z = cross_section_pcd(Q, V_std, x, y, z, st_pcd, int(Nu/2), Nu, lexyz, D, N)
+
+    # H or T型を判別するインスタンス
+    tyi = eT.typeInference(sp)
+
+
+    # ===================================================== T型============================================================
+    if(tyi.discrimination() == 0):
+        print("\n[RESULT] この点群はT型と判断されました\n")
+
+        #主軸推定
+        Gn, ZZ = np.zeros((Nu, 2)), np.zeros(Nu)
+        with tqdm(total=Nu) as progress:
+            progress.set_description("主軸推定")
+
             for i in range(Nu):
-                future = executor.submit(fn, i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL)
-                future.add_done_callback(lambda p: progress.update()) 
-                futures.append(future)
+                try:
+                    Sp, ZZ[i] = cross_section_pcd(Q, V_std, x, y, z, st_pcd, i, Nu, lexyz, D, N)
+                    TP = eT.TShapeProcessing(Sp)
+                    TP.FeaturePointEstimation()
+                    Gn[i] = TP.webCP() #webの中心座標を取得
 
-        # 結果を格納
-        Gn = np.append(Gn, [f.result()[0] for f in futures], axis=0)
-        ZZ = np.append(ZZ, [f.result()[1] for f in futures])
-        idx = [int(f.result()[2]) for f in futures]
-        Gn, ZZ = sorting(Gn, ZZ, idx)
+                    progress.update()
 
-    rV = principal_axis_decision(Gn, ZZ, Q, w) #各断面の主軸に対する二次元変換行列を作成
+                except:
+                    import traceback
+                    print("\n[ERROR] process %d" %(i))
+                    traceback.print_exc()
+                    
+                    progress.update()
+                    continue
+
+        
+
+        #各断面の主軸に対する二次元変換行列を作成
+        rV = principal_axis_decision(Gn, ZZ, Q, w) 
 
 
-    # =========================================================フィッティング・特徴点取得=========================================================
-
-    output_log("< Fitting / Feature point acquisition >", False, epath)
-    vtx, cont = np.zeros((0, 3)), np.zeros((0, 3))
-    # rZZ = np.zeros(Nu) #系におけるz座標
-   
-    with tqdm(total=Nu) as progress:
-        futures = []
+        #フィッティング
+        vtx, cont = np.zeros((0, 3)), np.zeros((0, 3))
         tmpdatas = tmpDatas()
 
-        # 並列処理
-        with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
+        with tqdm(total=Nu) as progress:
+            progress.set_description("フィッティング")
             
             for i in range(Nu):
-                future = executor.submit(fn_fit, i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, pN)
-                future.add_done_callback(lambda p: progress.update()) 
-                futures.append(future)
-                
-        # 結果を格納
-        for i in range(Nu):
-            # print(futures[i].result()[2])
-            if futures[i].result()[2] != -1:
-                vtx = np.append(vtx, futures[i].result()[0], axis=0)
-                cont = np.append(cont, futures[i].result()[1], axis=0)
-                tmpdatas.addData(futures[i].result()[3])
-                
+                try:
+                    if(np.all(rV[i]) == 0):
+                        progress.update()
+                        continue
+
+                    Sp, rZ = cross_section_pcd(rV[i], rV[i][2], x, y, z, st_pcd, i, Nu, lexyz, D, N)
+                    TP = eT.TShapeProcessing(Sp)
+                    TP.FeaturePointEstimation(DESCRIPTION)
+                    s_seg, s_vtx = TP.contourPcd(pN, DESCRIPTION), TP.featurePcd()
                     
-            
-    # データの保存
-    np.savetxt(ouf_vtx, vtx)
-    np.savetxt(ouf_cont, cont)
-    # tmpfileに出力
-    tmpdatas.output(Nu, ouf_td)
+                    # 三次元に変換し格納
+                    vtx = np.append(vtx, retransform_coordinate_system(s_vtx, rV[i], rZ), axis=0)
+                    cont = np.append(cont, retransform_coordinate_system(s_seg, rV[i], rZ), axis=0)
+
+                    # Tmpdataに格納
+                    tmpdatas.addData(tmpData(i, rc_gv(TP.webCP(), rV[i], rZ), np.array([[rV[i][1][0]], [rV[i][1][1]], [rV[i][1][2]]]).T, s_vtx))
+                    progress.update()
+
+                except:
+                    import traceback
+                    print("\n[ERROR] process %d" %(i))
+                    traceback.print_exc()
+                    
+                    progress.update()
+                    continue
+
+        # データの保存
+        np.savetxt(ouf_vtx, vtx)
+        np.savetxt(ouf_cont, cont)
+        tmpdatas.save(ouf_td)
+
+
+        
+    # ===================================================== H型============================================================
+    elif(tyi.discrimination() == 1):
+        print("\n[RESULT] この点群はH型と判断されました\n")
+
+        #主軸推定
+        output_log("< center of gravity estimation >", False, epath)
+        Gn, ZZ = np.zeros((0, 2)), np.zeros(0)
+        
+        with tqdm(total=Nu) as progress:
+            futures = []
+            progress.set_description("主軸推定")
+
+            # 並列処理
+            with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:  # -----(2)
+                for i in range(Nu):
+                    future = executor.submit(fn, i, Q, V_std, x, y, z, st_pcd, Nu, lexyz, D, N, epath, DESCRIPTION, DETAIL)
+                    future.add_done_callback(lambda p: progress.update()) 
+                    futures.append(future)
+
+            # 結果を格納
+            Gn = np.append(Gn, [f.result()[0] for f in futures], axis=0)
+            ZZ = np.append(ZZ, [f.result()[1] for f in futures])
+            idx = [int(f.result()[2]) for f in futures]
+            Gn, ZZ = sorting(Gn, ZZ, idx)
+
+        rV = principal_axis_decision(Gn, ZZ, Q, w) #各断面の主軸に対する二次元変換行列を作成
+
+
+        #フィッティング・特徴点取得
+        output_log("< Fitting / Feature point acquisition >", False, epath)
+        vtx, cont = np.zeros((0, 3)), np.zeros((0, 3))
+        # rZZ = np.zeros(Nu) #系におけるz座標
+    
+        with tqdm(total=Nu) as progress:
+            futures = []
+            progress.set_description("フィッティング")
+            tmpdatas = tmpDatas()
+
+            # 並列処理
+            with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
+                
+                for i in range(Nu):
+                    future = executor.submit(fn_fit, i, rV, x, y, z, st_pcd, Nu, D, N, lexyz, epath, DESCRIPTION, DETAIL, pN)
+                    future.add_done_callback(lambda p: progress.update()) 
+                    futures.append(future)
+                    
+            # 結果を格納
+            for i in range(Nu):
+                # print(futures[i].result()[2])
+                if futures[i].result()[2] != -1:
+                    vtx = np.append(vtx, futures[i].result()[0], axis=0)
+                    cont = np.append(cont, futures[i].result()[1], axis=0)
+                    tmpdatas.addData(futures[i].result()[3])
+                    
+                        
+                
+        # データの保存
+        np.savetxt(ouf_vtx, vtx)
+        np.savetxt(ouf_cont, cont)
+        # tmpfileに出力
+        tmpdatas.output(Nu, ouf_td)
+
+    
+    return 0
+
 
 
 if __name__ == "__main__":
     print("===============================================")
-    print("noIncompletePcd.py   ( version: 1.3.1 ) ")
+    print("noIncompletePcd.py   ( version: 2.0.1 ) ")
     print("python 3.6.5, anaconda 4.10.3 ")
     print("Lib: numpy:1.19.2 matplotlib:3.3.4 scipy:1.5.2")
     print("tqdm:4.61.2 ")
     print("===============================================\n")
-    main()
-    print("complete! [Enter > ]")
+    result = main()
+    print("\ncomplete! [Enter > ]")
     input()
 
