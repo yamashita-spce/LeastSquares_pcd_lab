@@ -992,12 +992,13 @@ def main():
         outfle()
         # 分割数の指定
         division_number_input()
-        #座標ごとの配列に転置
+        #座標ごとの 配列に転置
         x, y, z = xyz.T
         #座標ごとの最大値、最小値
         ixyz = np.array([np.max(x), np.min(x), np.max(y), np.min(y), np.max(z), np.min(z)])
         #座標ごとの点群の最大距離
         lexyz = np.array([np.abs(ixyz[0] - ixyz[1]), np.abs(ixyz[2] - ixyz[3]), np.abs(ixyz[4] - ixyz[5])])
+        # print(np.linalg.norm(lexyz))
        
     except Exception as e:
         print(e)

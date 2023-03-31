@@ -3,6 +3,7 @@
 #詳細：
 from scipy.optimize import minimize
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 
@@ -19,13 +20,22 @@ class typeInference:
     #T型なら0 H型なら1を返す
     def discrimination(self):
 
+        hParameterCount = 6
+        tParameterCount = 4
+
         hidx = self.HEvaluationValue()
         tidx = self.TEvaluationValue()
+        n = len(self.pcd) #点数
 
-        print("\n[誤差値] H -> %f,  T -> %f" %(hidx*1.1, tidx))
+        # パラメータ考慮した誤差値
+        hfn = math.sqrt(hidx*hParameterCount / n)
+        tfn = math.sqrt(tidx*tParameterCount / n)
 
+        print("\n[返り値] H -> %f,  T -> %f" %(hidx, tidx))
+        print("点群総数: %d 点, 標準偏差: H -> %f, T -> %f" %(n, math.sqrt(hidx / n), math.sqrt(tidx / n)))
+        print("parameter数を考慮した誤差値: H -> %f, T -> %f" %(hfn, tfn))
 
-        if hidx*1.1 < tidx:
+        if hfn < tfn:
             return 1
         else:
             return 0
